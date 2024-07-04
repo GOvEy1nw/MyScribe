@@ -3,6 +3,7 @@ from ..ui.base import base_page
 from .options import options
 from ..states.state import uploadState
 
+
 def index() -> rx.Component:
     return base_page(
         rx.vstack(
@@ -10,18 +11,20 @@ def index() -> rx.Component:
             rx.container(
                 rx.cond(
                     uploadState.file == "",
-                    rx.upload(
-                        rx.text("Drag and drop files here or click to select files"),
+                    rx.vstack(
+                        rx.upload(
+                            rx.text("Drag and drop files here or click to select files"),
                         multiple=False,
-                        on_drop=uploadState.handle_upload(rx.upload_files(upload_id="upload1")),
                         id="file_upload",
+                        on_drop=uploadState.handle_upload(rx.upload_files(upload_id="file_upload")),
                         width="100%",
                         border="none",
                         padding="5em",
+                        ),
                     ),
                     rx.vstack(
                         rx.hstack(
-                            rx.text(f"{uploadState.file}", weight="bold"),
+                            rx.text(uploadState.file, weight="bold"),
                             rx.button(
                                 "X",
                                 on_click=uploadState.clear_file,
@@ -45,6 +48,6 @@ def index() -> rx.Component:
                 min_height="350px",
                 border_radius="10px",
             ),
-            align_items="center",
+        align_items="center",
         ),
     )

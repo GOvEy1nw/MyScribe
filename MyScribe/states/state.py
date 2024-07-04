@@ -1,7 +1,6 @@
 import reflex as rx
 from ..utils.whisper_processor import process_audio
-import json
-from ollama import AsyncClient
+from ..utils.gen_SumChap import generate_chapters, generate_summary
 
 class uploadState(rx.State):
     file: str = ""
@@ -10,6 +9,13 @@ class uploadState(rx.State):
         """Handle the upload of file(s)."""
         if files:
             self.file = files[0].filename
+            for file in files:
+                upload_data = await file.read()
+                outfile = rx.get_upload_dir() / file.filename
+
+                # Save the file.
+                with outfile.open("wb") as file_object:
+                    file_object.write(upload_data)
 
     def clear_file(self):
         """Clear the uploaded file."""
@@ -82,7 +88,10 @@ class ClickState(uploadState):
         "Summary": False
     }
 
-    num_chapters: int = 5
+    generate_button: bool = False
+    gen_start: bool = False
+
+    num_chapters: str = "5 Chapters"
     transcript: str = rx.LocalStorage("", name="transcript")
     subtitles: str = rx.LocalStorage("", name="subtitles")
     chapters: str = rx.LocalStorage("", name="chapters")
@@ -92,6 +101,8 @@ class ClickState(uploadState):
         self.variants[button] = "solid" if self.variants[button] == "outline" else "outline"
 
     async def generate(self):
+        self.gen_start = True
+        self.generate_button = True
         yield
         for option, variant in self.variants.items():
             if variant == "solid":
@@ -117,68 +128,37 @@ class ClickState(uploadState):
                 print(progress)
             else:
                 self.transcript, subtitles = progress
-                self.subtitles = json.dumps(subtitles)
+                self.grab_subs = subtitles
 
         for option, variant in self.variants.items():
             if variant == "solid":
                 if option == "Transcript":
-                    await self.generate_transcript()
+                    await self.transcript_complete()
                 elif option == "Subtitles":
-                    await self.generate_subtitles()
+                    await self.subtitles_complete()
                 elif option == "Chapters":
-                    await self.generate_chapters()
+                    await self.chapters_complete()
                 elif option == "Summary":
-                    await self.generate_summary()
+                    await self.summary_complete()
         yield
 
-    async def generate_transcript(self):
+    async def transcript_complete(self):
         self.complete["Transcript"] = True
 
-    async def generate_subtitles(self):
+    async def subtitles_complete(self):
+        self.subtitles = self.grab_subs
         self.complete["Subtitles"] = True
 
-    async def generate_chapters(self):
-        print("Generating chapters...")
-        try:
-            client = AsyncClient()
-            response = await client.chat(
-                model='llama3:8b',
-                messages=[
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant that generates chapters for a video transcript. Only reply with the chapter titles.',
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'Please generate {self.num_chapters} chapters for the following transcript:\n\n{self.transcript}',
-                    }
-                ]
-            )
-            self.chapters = response['message']['content']
-            self.complete["Chapters"] = True
-        except Exception as e:
-            print(f"Error generating chapters: {str(e)}")
-            self.chapters = "Error generating chapters. Please try again."
+    async def chapters_complete(self):
+        self.chapters = await generate_chapters(self.transcript, self.num_chapters)
+        self.complete["Chapters"] = True
 
-    async def generate_summary(self):
-        print("Generating summary...")
-        try:
-            client = AsyncClient()
-            response = await client.chat(
-                model='llama3:8b',
-                messages=[
-                    {
-                        'role': 'system',
-                        'content': 'You are a helpful assistant that summarizes transcripts. Only reply with the summary.',
-                    },
-                    {
-                        'role': 'user',
-                        'content': f'Please summarize the following transcript in a concise manner:\n\n{self.transcript}',
-                    }
-                ]
-            )
-            self.summary = response['message']['content']
-            self.complete["Summary"] = True
-        except Exception as e:
-            print(f"Error generating summary: {str(e)}")
-            self.summary = "Error generating summary. Please try again."
+    async def summary_complete(self):
+        self.summary = await generate_summary(self.transcript)
+        self.complete["Summary"] = True
+
+    def download_srt(self):
+        return rx.download(
+            data=self.subtitles,
+            filename="subtitles.srt"
+        )

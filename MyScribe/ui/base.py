@@ -53,10 +53,9 @@ def base_page(child: rx.Component) -> rx.Component:
                 ),
             ),
         ),
-        rx.logo(position="absolute", bottom="0", left="0"),
         width="100%",
         min_height="85vh",
         align_items="center",
-        justify_content="center",
+        padding_top="100px",
         size="4",
     )

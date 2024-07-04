@@ -19,3 +19,4 @@ app = rx.App(
 )
 app.add_page(pages.index)
 app.add_page(pages.options, route="/options")
+app.add_page(pages.output, route="/output")
