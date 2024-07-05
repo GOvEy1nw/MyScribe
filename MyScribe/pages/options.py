@@ -58,7 +58,7 @@ def options() -> rx.Component:
                             ),
                             rx.select(
                                 ["2 Chapters", "3 Chapters", "4 Chapters", "5 Chapters", "6 Chapters", "7 Chapters", "8 Chapters", "9 Chapters", "10 Chapters"],
-                                default_value="5 Chapters", on_change=ClickState.set_num_chapters,
+                                default_value=ClickState.num_chapters, on_change=ClickState.set_num_chapters,
                             ),
                             justify_content="center",
                             flex_direction="column",
@@ -69,22 +69,32 @@ def options() -> rx.Component:
                 ),
 
         rx.cond(
-            (ClickState.complete["Transcript"] == True) | (ClickState.complete["Subtitles"] == True) | (ClickState.complete["Summary"] == True) | (ClickState.complete["Chapters"] == True),
-                rx.button(
-                    "View",
-                    on_click=rx.redirect(
-                        "/output",
+            ClickState.finished == True,
+                rx.vstack(
+                    rx.text(ClickState.transcribing_message),
+                    rx.button(
+                        "View",
+                        on_click=rx.redirect(   
+                            "/output",
+                            ),
+                        size="4",
                     ),
-                    size="4",
+                    width="100%",
+                    spacing="4",
+                    align="center",
+                    justify_content="center",
+                ),
+                rx.cond(
+                    (ClickState.variants["Transcript"] == "solid") | 
+                    (ClickState.variants["Subtitles"] == "solid") | 
+                    (ClickState.variants["Chapters"] == "solid") | 
+                    (ClickState.variants["Summary"] == "solid"),
+                    rx.vstack(
+                        rx.text(ClickState.transcribing_message),
+                        rx.button("Generate", variant="solid", disabled=ClickState.generate_button, size="4", on_click=ClickState.generate),
                     ),
-            rx.cond(
-                (ClickState.variants["Transcript"] == "solid") | 
-                (ClickState.variants["Subtitles"] == "solid") | 
-                (ClickState.variants["Chapters"] == "solid") | 
-                (ClickState.variants["Summary"] == "solid"),
-                rx.button("Generate", variant="solid", disabled=ClickState.generate_button, size="4", on_click=ClickState.generate),
-                rx.button("Generate", variant="solid", disabled=True, size="4"),
-            ),
+                    rx.button("Generate", variant="solid", disabled=True, size="4"),
+                ),
         ),
         width="100%",
         spacing="4",

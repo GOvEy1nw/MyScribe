@@ -5,7 +5,7 @@ from . import pages
 app = rx.App(
     style={
         ".settings-button": {
-            "position": "absolute",
+            "position": "fixed",
             "bottom": "5em",
             "left": "2em",
             "color": "inherit",
@@ -13,6 +13,15 @@ app = rx.App(
             "background": "transparent",
             },
         ".settings-button:hover": {
+            "cursor": "pointer",
+            },
+        ".startover-button": {
+            "position": "fixed",
+            "top": "2em",
+            "left": "2em",
+            "z-index": "20",
+            },
+        ".startover-button:hover": {
             "cursor": "pointer",
             },
         }

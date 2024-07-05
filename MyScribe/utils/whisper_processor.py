@@ -16,8 +16,10 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model = WhisperModel("large-v3", device=device)
 
 async def process_audio(file_path, min_chars_per_line=100):
-    yield "Transcribing audio..."
-    segments, info = model.transcribe(file_path, beam_size=5, vad_filter=True)
+    transcribing_message = "Processing audio..."
+    yield transcribing_message
+    segments_generator, info = model.transcribe(file_path, beam_size=5, vad_filter=True)
+    segments = list(segments_generator)  # Convert generator to list
 
     transcript = []
     subtitles = []
@@ -43,7 +45,6 @@ async def process_audio(file_path, min_chars_per_line=100):
             transcript.append(f"[{format_time(line_start)} --> {format_time(segment.end)}]\n{current_line.strip()}\n\n")
             current_line = ""
             line_start = segment.end
-
     # Add any remaining text to transcript
     if current_line:
         transcript.append(f"[{format_time(line_start)} --> {format_time(segments[-1].end)}]\n{current_line.strip()}\n\n")
