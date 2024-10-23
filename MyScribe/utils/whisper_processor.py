@@ -18,7 +18,7 @@ model = WhisperModel("large-v3", device=device)
 async def process_audio(file_path, min_chars_per_line=100):
     transcribing_message = "Processing audio..."
     yield transcribing_message
-    segments_generator, info = model.transcribe(file_path, beam_size=5, vad_filter=True)
+    segments_generator, info = model.transcribe(file_path, beam_size=5, vad_filter=True, language="en")
     segments = list(segments_generator)  # Convert generator to list
 
     transcript = []
