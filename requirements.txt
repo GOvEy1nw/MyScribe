@@ -1,6 +1,6 @@
-reflex==0.5.5
+reflex>=0.5.5
 ollama==1.1.0
-faster-whisper==0.1.0
-torch==2.1.2
-torchaudio==2.1.2
-torchvision==2.1.2
+faster-whisper @ https://github.com/SYSTRAN/faster-whisper/archive/refs/heads/master.tar.gz
+torch==2.5.1+cu124
+torchaudio==2.5.1+cu124
+torchvision==0.20.1+cu124

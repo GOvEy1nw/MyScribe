@@ -3,6 +3,13 @@ from rxconfig import config
 from . import pages
 
 app = rx.App(
+    theme=rx.theme(
+        appearance="light",
+        has_background=True,
+        radius="full",
+        accent_color="pink",
+        gray_color="auto",
+    ),
     style={
         ".settings-button": {
             "position": "fixed",

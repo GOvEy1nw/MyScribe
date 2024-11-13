@@ -13,7 +13,7 @@ logging.basicConfig()
 logging.getLogger("faster_whisper").setLevel(logging.DEBUG)
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model = WhisperModel("large-v3", device=device)
+model = WhisperModel("large-v3-turbo", device=device)
 
 async def process_audio(file_path, min_chars_per_line=100):
     transcribing_message = "Processing audio..."

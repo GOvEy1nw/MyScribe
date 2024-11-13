@@ -8,12 +8,13 @@ class uploadState(rx.State):
     uploading: bool = False
     up_progress: int = 0
     total_bytes: int = 0
+    grab_subs: str = ""
 
     async def handle_upload(self, files: list[rx.UploadFile]):
         """Handle the upload of file(s)."""
         if files:
             self.file = files[0].filename
-            self.file_loaded = "True"
+            self.file_loaded = True
             for file in files:
                 upload_data = await file.read()
                 outfile = rx.get_upload_dir() / file.filename
@@ -72,6 +73,35 @@ class llm_selected(rx.State):
             return rx.remove_local_storage("Gemini")
 
 class ClickState(uploadState):
+    gen_start: bool = False
+    transcribing_message: str = " "
+    generate_button: bool = False
+    finished: bool = False
+
+    variants: dict[str, str] = {
+        "Transcript": "outline",
+        "Subtitles": "outline",
+        "Chapters": "outline",
+        "Summary": "outline"
+    }
+    processing: dict[str, bool] = {
+        "Transcript": False,
+        "Subtitles": False,
+        "Chapters": False,
+        "Summary": False
+    }
+    disable: dict[str, bool] = {
+        "Transcript": False,
+        "Subtitles": False,
+        "Chapters": False,
+        "Summary": False
+    }
+    complete: dict[str, bool] = {
+        "Transcript": False,
+        "Subtitles": False,
+        "Chapters": False,
+        "Summary": False
+    }
 
     def clear_file(self):
         """Clear the uploaded file."""
@@ -101,36 +131,6 @@ class ClickState(uploadState):
         self.subtitles = self.subtitles
         self.chapters = self.chapters
         self.summary = self.summary
-
-    variants: dict[str, str] = {
-        "Transcript": "outline",
-        "Subtitles": "outline",
-        "Chapters": "outline",
-        "Summary": "outline"
-    }
-    processing: dict[str, bool] = {
-        "Transcript": False,
-        "Subtitles": False,
-        "Chapters": False,
-        "Summary": False
-    }
-    disable: dict[str, bool] = {
-        "Transcript": False,
-        "Subtitles": False,
-        "Chapters": False,
-        "Summary": False
-    }
-    complete: dict[str, bool] = {
-        "Transcript": False,
-        "Subtitles": False,
-        "Chapters": False,
-        "Summary": False
-    }
-
-    transcribing_message: str = ""
-    generate_button: bool = False
-    gen_start: bool = False
-    finished: bool = False
 
     num_chapters: str = rx.LocalStorage("5 Chapters", name="num_chapters")
     transcript: str = rx.LocalStorage("", name="transcript")
@@ -165,8 +165,8 @@ class ClickState(uploadState):
 
     async def generate(self):
         self.transcribing_message = "Processing audio..."
-        self.gen_start = True
-        self.generate_button = True
+        self.gen_start
+        self.generate_button
         uploadState.handle_upload(
             rx.upload_files(
                 upload_id="file_upload",
@@ -213,6 +213,7 @@ class ClickState(uploadState):
                     await self.summary_complete()
                     yield
         self.finished = True
+        self.transcribing_message = "Processing complete!"
         yield
 
     async def transcript_complete(self):
@@ -260,6 +261,7 @@ class ResetState(ClickState):
         self.uploading = False
         self.up_progress = 0
         self.total_bytes = 0
+        self.transcribing_message = ""
 
 class InitState(ClickState):
     def init_state(self):
@@ -275,3 +277,4 @@ class InitState(ClickState):
         self.up_progress = 0
         self.total_bytes = 0
         self.finished = False
+        self.transcribing_message = ""

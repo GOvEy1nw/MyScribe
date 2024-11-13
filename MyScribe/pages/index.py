@@ -6,9 +6,10 @@ from ..states.state import uploadState, InitState, ClickState
 
 @rx.page(on_load=InitState.init_state)
 def index() -> rx.Component:
+    file_path = rx.get_upload_url(uploadState.file)
     return base_page(
         rx.vstack(
-            rx.heading("Generate Subtitles, Chapters & Summaries from videos in", rx.text(" seconds", as_="span", color_scheme="indigo"), size="8", align="center"),
+            rx.heading("WOWVI", rx.text("Scribe", as_="span", color_scheme="pink"), size="8", align="center"),
             rx.container(
                 rx.cond(
                     uploadState.file_loaded == "False",
@@ -38,6 +39,13 @@ def index() -> rx.Component:
                             ),
                             align_items="center",
                         ),
+                        rx.video(
+                            url=file_path,
+                            controls=True,
+                            width="auto",
+                            max_height="500px",
+                            class_name="media-player",
+                        ),
                         rx.text(f"What would you like to generate?"),
                         options(),
                         spacing="3",
@@ -48,7 +56,7 @@ def index() -> rx.Component:
                 spacing="5",
                 justify="center",
                 justify_content="center",
-                border="1px dashed rgb(107,99,246)",
+                border="1px dashed pink",
                 padding="5em",
                 min_height="350px",
                 border_radius="10px",

@@ -14,7 +14,7 @@ async def generate_chapters(transcript, num_chapters):
                 },
                 {
                     'role': 'user',
-                    'content': f'Please generate {num_chapters} for the following transcript:\n\n{transcript}',
+                    'content': f'Please provide a list of chapter titles and starting timecodes for the following transcript:\n\n{transcript}',
                 }
             ]
         )
@@ -36,7 +36,7 @@ async def generate_summary(transcript):
             messages=[
                 {
                     'role': 'system',
-                    'content': 'You are a helpful assistant that summarizes transcripts. Only reply with the summary.',
+                    'content': 'You are a helpful assistant that summarizes transcripts. Only reply with the summary. Do not mention the transcript in your response.',
                 },
                 {
                     'role': 'user',
